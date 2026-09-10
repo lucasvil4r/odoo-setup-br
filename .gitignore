@@ -1,0 +1,17 @@
+# Configuração e segredos por cliente
+.env
+# gerado por scripts/render-config.sh
+config/odoo.conf
+
+# Repositórios OCA: são clones externos, fixados por commit em oca-repos.conf.
+# Versionar o conteúdo deles inflaria o repo e criaria um fork implícito que
+# ninguém consegue atualizar. Reproduza com: make fetch
+addons/oca/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Diversos
+*.log
+.DS_Store

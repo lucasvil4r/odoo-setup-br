@@ -1,0 +1,16 @@
+# GERADO POR scripts/render-config.sh — NÃO EDITE config/odoo.conf DIRETAMENTE.
+# Edite este template ou o .env e rode `make config`.
+[options]
+addons_path = {{ADDONS_PATH}}
+data_dir = /var/lib/odoo
+
+admin_passwd = {{ADMIN_PASSWD}}
+
+db_host = db
+db_port = 5432
+db_user = {{DB_USER}}
+db_password = {{DB_PASSWORD}}
+db_filter = {{DB_FILTER}}
+
+workers = {{WORKERS}}
+log_level = {{LOG_LEVEL}}
