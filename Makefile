@@ -51,8 +51,18 @@ help:
 	@echo
 	@echo "PROJECT=$(PROJECT)  banco=$(PROJECT)  porta=$(ODOO_PORT)"
 
+# O exit 1 quando o .env não existe é intencional: seguir com os valores de
+# exemplo criaria containers e banco chamados "acme". A mensagem avisa que a
+# parada é esperada, senão o "Error 1" do make parece defeito.
 init:
-	@test -f .env || (cp .env.example .env && echo "-> .env criado a partir do .env.example. Ajuste PROJECT e ADMIN_PASSWD e rode 'make init' de novo." && exit 1)
+	@test -f .env || { \
+	  cp .env.example .env; \
+	  echo "======================================================================"; \
+	  echo " .env criado a partir do .env.example."; \
+	  echo " Ajuste PROJECT e ADMIN_PASSWD e rode 'make init' de novo."; \
+	  echo " (a parada abaixo e esperada, nao e erro)"; \
+	  echo "======================================================================"; \
+	  exit 1; }
 	@$(MAKE) fetch config build up
 	@echo
 	@echo "Ambiente no ar em http://localhost:$(ODOO_PORT)"
