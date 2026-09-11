@@ -12,7 +12,7 @@ fora daqui, por ser específica de cada negócio.
 ## Começando um projeto novo
 
 ```bash
-git clone <este-repo> cliente-acme && cd cliente-acme
+git clone https://github.com/lucasvil4r/odoo-setup-br.git cliente-acme && cd cliente-acme
 cp .env.example .env          # ajuste PROJECT e ADMIN_PASSWD
 make init                     # baixa OCA, gera config, builda, sobe
 make install-br               # instala a localização fiscal
@@ -117,7 +117,7 @@ documentada, um ajuste no Dockerfile) não chegam sozinhas nos projetos já
 iniciados. Configure o template como um segundo remoto e traga o que interessa:
 
 ```bash
-git remote add template <url-deste-repositorio>
+git remote add template https://github.com/lucasvil4r/odoo-setup-br.git
 git fetch template
 git log --oneline HEAD..template/master     # o que existe lá e não aqui
 git merge template/master                   # ou cherry-pick de commits soltos
