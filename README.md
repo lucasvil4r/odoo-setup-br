@@ -16,6 +16,7 @@ git clone https://github.com/lucasvil4r/odoo-setup-br.git cliente-acme && cd cli
 cp .env.example .env          # ajuste PROJECT e ADMIN_PASSWD
 make init                     # baixa OCA, gera config, builda, sobe
 make install-br               # instala a localização fiscal
+make install-ui               # menu de apps com ícones e campos visíveis
 ```
 
 Odoo em `http://localhost:8069`. `make` sozinho lista todos os alvos.

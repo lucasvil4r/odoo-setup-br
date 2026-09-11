@@ -20,8 +20,12 @@ DEMO_FLAG := $(if $(filter 1 yes true,$(DEMO)),,--without-demo=all)
 # faz o Odoo tratar o resto da lista como argumentos soltos.
 BR_MODULES := l10n_br_base,l10n_br_zip,l10n_br_coa_generic,l10n_br_account,l10n_br_fiscal,l10n_br_nfe,l10n_br_purchase,l10n_br_sale,l10n_br_stock_account
 
+# Interface (OCA/web). O Community não tem a tela inicial com ícones do
+# Enterprise e, desde a v17, esconde a borda dos campos até o mouse passar.
+UI_MODULES := web_responsive,web_theme_classic
+
 .PHONY: help init fetch check-updates config build up down restart logs ps \
-        install install-br update shell psql deps test new-module reset
+        install install-br install-ui update shell psql deps test new-module reset
 
 help:
 	@echo "Setup de um projeto novo:"
@@ -41,6 +45,7 @@ help:
 	@echo "Módulos:"
 	@echo "  make install-br       instala a localização fiscal brasileira (sem demo)"
 	@echo "  make install-br DEMO=1  idem, com dados de demonstração"
+	@echo "  make install-ui       menu de apps com ícones e campos visíveis (OCA/web)"
 	@echo "  make install m=a,b    instala módulos"
 	@echo "  make update m=a,b     atualiza módulos (use após mexer no seu código)"
 	@echo "  make new-module name=x  cria o esqueleto de um módulo em addons/local/"
@@ -66,7 +71,7 @@ init:
 	@$(MAKE) fetch config build up
 	@echo
 	@echo "Ambiente no ar em http://localhost:$(ODOO_PORT)"
-	@echo "Próximo passo: make install-br"
+	@echo "Próximo passo: make install-br && make install-ui"
 
 fetch:
 	@./scripts/fetch-oca.sh
@@ -97,6 +102,9 @@ ps:
 
 install-br:
 	@$(MAKE) install m="$(BR_MODULES)"
+
+install-ui:
+	@$(MAKE) install m="$(UI_MODULES)"
 
 install:
 	@test -n "$(m)" || (echo "uso: make install m=modulo1,modulo2" >&2; exit 1)
