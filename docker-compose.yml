@@ -1,6 +1,6 @@
 # Valores vêm do .env (veja .env.example). Trocar PROJECT isola containers,
 # volumes e banco — dois clientes podem rodar lado a lado na mesma máquina,
-# desde que ODOO_PORT seja diferente.
+# desde que ODOO_PORT e DB_PORT sejam diferentes.
 
 name: ${PROJECT}
 
@@ -14,6 +14,9 @@ services:
       POSTGRES_USER: ${DB_USER:-odoo}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-odoo}
       PGDATA: /var/lib/postgresql/data/pgdata
+    # Só em 127.0.0.1: acesso por DBeaver/psql da própria máquina, nunca da rede.
+    ports:
+      - "127.0.0.1:${DB_PORT:-5432}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data/pgdata
     healthcheck:
