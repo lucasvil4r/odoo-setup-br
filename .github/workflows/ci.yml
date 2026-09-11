@@ -1,0 +1,90 @@
+# Roda em todo pull request e na master. Em PR vindo de fork, só executa depois
+# que o mantenedor aprova (Settings → Actions → General → "Require approval for
+# all external contributors").
+#
+# Os dois jobs são os status checks exigidos pelo ruleset da master. Não ponha
+# filtro de paths neste workflow: check exigido que não roda fica pendente para
+# sempre e trava o merge.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# Só leitura. Nada aqui publica, comenta ou aprova PR — e é pull_request, não
+# pull_request_target: o código de um fork nunca roda com permissão do repo.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificacoes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: shellcheck
+        run: shellcheck scripts/*.sh
+
+      - name: Pins do oca-repos.conf pertencem aos branches declarados
+        run: ./scripts/fetch-oca.sh --verify
+
+      - name: .env.example gera odoo.conf e compose válidos
+        run: |
+          cp .env.example .env
+          make config
+          if grep -n '{{' config/odoo.conf; then
+            echo "placeholder não substituído em config/odoo.conf" >&2
+            exit 1
+          fi
+          docker compose config --quiet
+
+  # A promessa do template, de ponta a ponta: um fork novo com o .env.example
+  # builda, baixa a OCA nos pins e instala a localização e a interface.
+  # A suíte da OCA (make test) fica fora — é longa demais para todo PR e deve
+  # ser rodada por quem move pin ou mexe no Dockerfile.
+  instalacao:
+    needs: verificacoes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Baixa a OCA nos pins e gera a config
+        run: |
+          cp .env.example .env
+          make fetch config
+
+      - name: Build da imagem
+        run: make build
+
+      - name: Sobe o ambiente
+        run: docker compose up -d --wait --wait-timeout 180
+
+      # '$(BR_MODULES)' e '$(UI_MODULES)' são expandidos pelo próprio make:
+      # a lista de módulos continua existindo só no Makefile.
+      - name: Fecho de dependências
+        run: |
+          # shellcheck disable=SC2016
+          make deps m='$(BR_MODULES),$(UI_MODULES)'
+
+      - name: Instala a localização e a interface
+        run: make install-br install-ui
+
+      - name: Logs do ambiente
+        if: failure()
+        run: docker compose logs --tail=300
+
+      - name: Derruba o ambiente
+        if: always()
+        run: docker compose down -v
