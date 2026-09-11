@@ -24,13 +24,13 @@ Odoo em `http://localhost:8069`. `make` sozinho lista todos os alvos.
 
 | Onde | O quê |
 |---|---|
-| `.env` | `PROJECT` (vira nome do banco e dos containers), `ADMIN_PASSWD`, `ODOO_PORT` |
+| `.env` | `PROJECT` (vira nome do banco e dos containers), `ADMIN_PASSWD`, `ODOO_PORT`, `DB_PORT` |
 | `oca-repos.conf` | repositórios OCA extras, se o cliente precisar (NFS-e, RH, etc.) |
 | `addons/local/` | os módulos de customização do cliente (`make new-module`) |
 | `README.md` | este arquivo, descrevendo o projeto do cliente |
 
 Trocar `PROJECT` isola containers, volumes e banco: dois clientes rodam lado a
-lado na mesma máquina, bastando `ODOO_PORT` diferente.
+lado na mesma máquina, bastando `ODOO_PORT` e `DB_PORT` diferentes.
 
 ## Arquitetura em camadas
 
