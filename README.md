@@ -73,7 +73,7 @@ retrabalho contábil.
 
 ## Dependências OCA fixadas por commit
 
-`oca-repos.conf` declara os cinco repositórios necessários e o commit exato de
+`oca-repos.conf` declara os repositórios OCA do projeto e o commit exato de
 cada um. Isso é o que garante que dois clientes forkados com meses de diferença
 rodem o mesmo código, e que atualizar a base seja uma decisão consciente:
 
@@ -83,8 +83,14 @@ make check-updates              # o que mudou nos branches desde os pins
 make fetch && make test         # valide ANTES de commitar o pin novo
 ```
 
-Só `l10n-brazil` é a localização em si; os outros quatro entram porque
-`l10n_br_fiscal` e `l10n_br_stock_account` dependem deles.
+Só `l10n-brazil` é a localização em si. `product-attribute`,
+`account-invoicing`, `stock-logistics-workflow` e `server-tools` entram porque
+`l10n_br_fiscal` e `l10n_br_stock_account` dependem deles; `web` traz os
+módulos de interface do `make install-ui`.
+
+`./scripts/fetch-oca.sh --verify` confere que cada pin é um commit do branch
+declarado — e não, por exemplo, um commit de fork. O CI roda essa checagem em
+todo pull request.
 
 ### Acrescentando um repositório OCA
 

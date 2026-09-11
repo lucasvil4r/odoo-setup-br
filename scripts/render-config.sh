@@ -11,7 +11,10 @@ TEMPLATE="$ROOT/config/odoo.conf.template"
 OUT="$ROOT/config/odoo.conf"
 
 [ -f "$ROOT/.env" ] || { echo "erro: .env não existe. Rode: cp .env.example .env" >&2; exit 1; }
-set -a; . "$ROOT/.env"; set +a
+set -a
+# shellcheck source=/dev/null
+. "$ROOT/.env"
+set +a
 
 : "${PROJECT:?defina PROJECT no .env}"
 : "${ADMIN_PASSWD:?defina ADMIN_PASSWD no .env}"

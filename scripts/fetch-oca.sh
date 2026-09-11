@@ -27,7 +27,7 @@ check_updates() {
 }
 
 update_pin() {
-  local target="$1" found=0
+  local target="$1"
   entries | while read -r name url branch commit; do
     [ "$name" = "$target" ] || continue
     head=$(git ls-remote "$url" "refs/heads/$branch" | cut -f1)
@@ -37,6 +37,33 @@ update_pin() {
     echo "Rode 'make fetch && make test' antes de commitar essa mudança."
   done
   grep -q "^${target}[[:space:]]" "$MANIFEST" || { echo "repositório '$target' não está em oca-repos.conf" >&2; exit 1; }
+}
+
+# Confere, sem baixar o código, que cada pin é um commit do branch declarado.
+# No GitHub, um commit de fork também é acessível pela URL do repositório
+# original; por isso a checagem é de pertencer ao branch, não só de existir.
+verify_pins() {
+  local rc=0
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
+  while read -r name url branch commit; do
+    if ! [[ "$commit" =~ ^[0-9a-f]{40}$ ]]; then
+      printf '%-28s ERRO: pin "%s" não é um SHA completo\n' "$name" "$commit"
+      rc=1; continue
+    fi
+    if ! git clone -q --bare --filter=tree:0 --single-branch --no-tags \
+         --branch "$branch" "$url" "$tmp/$name" 2>/dev/null; then
+      printf '%-28s ERRO: branch %s inacessível em %s\n' "$name" "$branch" "$url"
+      rc=1; continue
+    fi
+    if git -C "$tmp/$name" merge-base --is-ancestor "$commit" "refs/heads/$branch" 2>/dev/null; then
+      printf '%-28s ok    %s pertence a %s\n' "$name" "${commit:0:8}" "$branch"
+    else
+      printf '%-28s ERRO: %s não pertence a %s\n' "$name" "${commit:0:8}" "$branch"
+      rc=1
+    fi
+  done < <(entries)
+  return "$rc"
 }
 
 fetch_all() {
@@ -64,6 +91,7 @@ fetch_all() {
 case "${1:-}" in
   --check-updates) check_updates ;;
   --update)        update_pin "${2:?uso: $0 --update <nome-do-repo>}" ;;
+  --verify)        verify_pins ;;
   "")              fetch_all ;;
-  *) echo "uso: $0 [--check-updates | --update <repo>]" >&2; exit 1 ;;
+  *) echo "uso: $0 [--check-updates | --update <repo> | --verify]" >&2; exit 1 ;;
 esac
