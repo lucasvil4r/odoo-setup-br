@@ -1,0 +1,5 @@
+# Toda mudança exige revisão do mantenedor. Com "Require review from Code
+# Owners" ativo no ruleset da master, só essa aprovação libera o merge.
+#
+# Ao forkar para um cliente, troque pelo responsável do projeto.
+* @lucasvil4r

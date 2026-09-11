@@ -29,6 +29,8 @@ Odoo em `http://localhost:8069`. `make` sozinho lista todos os alvos.
 | `oca-repos.conf` | repositórios OCA extras, se o cliente precisar (NFS-e, RH, etc.) |
 | `addons/local/` | os módulos de customização do cliente (`make new-module`) |
 | `README.md` | este arquivo, descrevendo o projeto do cliente |
+| `.github/CODEOWNERS` | o responsável pelo projeto do cliente, no lugar do mantenedor do template |
+| `CONTRIBUTING.md`, `SECURITY.md` | adapte ao projeto do cliente ou remova |
 
 Trocar `PROJECT` isola containers, volumes e banco: dois clientes rodam lado a
 lado na mesma máquina, bastando `ODOO_PORT` e `DB_PORT` diferentes.
@@ -144,10 +146,14 @@ porque é justamente a parte que não varia por cliente.
 
 ```
 .
+├── .github/                 # CI, Dependabot, CODEOWNERS, modelo de PR
 ├── .env                     # config do cliente (NÃO versionado)
 ├── .env.example             # modelo do .env
+├── CONTRIBUTING.md          # como contribuir com o template
 ├── Dockerfile               # odoo:18.0 + libs Python da localização
+├── LICENSE                  # MIT — só o template, não o Odoo nem a OCA
 ├── Makefile                 # interface do dia a dia
+├── SECURITY.md              # reporte privado de vulnerabilidades
 ├── docker-compose.yml       # Odoo + PostgreSQL, parametrizado pelo .env
 ├── oca-repos.conf           # repositórios OCA fixados por commit
 ├── config/
@@ -193,14 +199,25 @@ contra schema, DANFE e os campos de IBS/CBS da Reforma Tributária.
 
 ## Licenciamento
 
+- **Este template** (Makefile, scripts, Dockerfile, compose, documentação):
+  **MIT** — veja [`LICENSE`](LICENSE).
 - **Odoo 18 Community**: LGPL-3.
 - **Módulos da OCA** (incluindo toda a `l10n-brazil`): **AGPL-3**.
 - O esqueleto gerado por `make new-module` já vem com `"license": "AGPL-3"`.
+
+A MIT cobre só o que está neste repositório. O Odoo e a OCA são baixados no
+build e no `make fetch`, não redistribuídos aqui, e mantêm as próprias licenças.
 
 O default é AGPL-3 porque um módulo que declara `depends` de um módulo AGPL-3
 tende a ser tratado como trabalho derivado. Isso tem efeito prático quando a
 customização é entregue ou hospedada para um cliente. Confirme com quem cuida
 do jurídico de vocês antes de fechar contrato — não é uma questão técnica.
+
+## Contribuindo
+
+Correções e melhorias do template entram por pull request — veja
+[`CONTRIBUTING.md`](CONTRIBUTING.md). Vulnerabilidades são reportadas em
+privado, conforme [`SECURITY.md`](SECURITY.md).
 
 ## Antes de ir para produção
 
