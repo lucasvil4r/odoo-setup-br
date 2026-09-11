@@ -1,0 +1,18 @@
+# Só as actions do CI. Elas são fixadas por SHA (um tag pode ser movido para
+# código malicioso; um SHA não), e o Dependabot abre o PR quando sai versão nova.
+#
+# Imagens Docker ficam de fora de propósito: odoo:18.0 e postgres:15 não são
+# fixadas por digest, então a única "atualização" que o Dependabot proporia é a
+# troca de versão maior — e isso é migração de dados, não bump de dependência.
+# Pins da OCA também não são dele: movem com fetch-oca.sh --update + make test.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "CI:"
