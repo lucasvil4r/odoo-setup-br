@@ -166,7 +166,9 @@ porque é justamente a parte que não varia por cliente.
 │   ├── fetch-oca.sh         # clona/atualiza a OCA nos pins
 │   ├── render-config.sh     # gera odoo.conf do .env + oca-repos.conf
 │   ├── check-deps.py        # fecho de dependências antes de instalar
-│   └── new-module.sh        # esqueleto de módulo de customização
+│   ├── new-module.sh        # esqueleto de módulo de customização
+│   ├── demo-oficina.py      # dados fictícios de oficina (make demo-oficina)
+│   └── atalhos-windows.bat  # atalhos ERP/PDV em janela de app no Windows
 └── docs/deploy-local.md     # guia detalhado e armadilhas conhecidas
 ```
 
@@ -186,6 +188,52 @@ make shell                         # inspecionar o ORM
 
 Mudança em XML de view também exige `make update`: as views ficam gravadas no
 banco, não são lidas do disco a cada request.
+
+## Demonstração para o cliente
+
+```bash
+make demo-oficina
+```
+
+Cria um banco separado, `$PROJECT_oficina`, com a localização, a interface, o
+PDV e dados fictícios de uma oficina mecânica: empresa no Simples Nacional,
+peças com NCM, serviços com código da LC 116 (14.01), clientes pessoa física e
+frotistas, fornecedores, estoque com regras de reposição, ordens de serviço em
+várias etapas (placa e veículo no campo "Referência do cliente"), compras e um
+PDV de balcão com Dinheiro, PIX, cartões e faturamento para o cliente. As
+peças têm código de barras EAN-13, então um leitor USB funciona no PDV.
+
+| Usuário | Senha | Papel |
+|---|---|---|
+| `admin` | `admin` | administrador |
+| `balcao` | `balcao` | caixa do PDV |
+| `consultor` | `consultor` | ordens de serviço e compras |
+
+O comando é idempotente. Para recriar do zero: `make demo-oficina-reset`.
+Os CNPJ/CPF/IE são inventados (só o dígito verificador é válido) e nenhuma
+nota fiscal é emitida.
+
+### Como app de desktop no Windows
+
+O Odoo é web, mas abre como um programa: ícone na área de trabalho, janela
+própria, sem barra de endereço. No Windows, no `cmd`, dentro da pasta do
+repositório:
+
+```bat
+scripts\atalhos-windows.bat localhost 8069 acme_oficina 1
+```
+
+Argumentos: servidor, porta, banco e id do PDV (o `make demo-oficina` imprime
+o comando exato no final). Para outra máquina da rede,
+troque `localhost` pelo IP do servidor. São criados dois atalhos que abrem o
+Edge em modo app:
+
+- **ERP**: o Odoo completo, para todos os usuários.
+- **PDV**: vai direto ao caixa e imprime na impressora padrão sem a janela de
+  impressão (`--kiosk-printing`). Usa um perfil próprio do Edge, porque a
+  flag só vale quando o processo do navegador nasce com ela.
+
+O acesso pelo navegador comum continua funcionando normalmente.
 
 ## Testes
 

@@ -1,0 +1,3 @@
+# O cmd do Windows exige CRLF: com LF, linhas com ^ e blocos ( ) quebram
+# de forma silenciosa.
+*.bat text eol=crlf
