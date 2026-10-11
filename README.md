@@ -83,7 +83,12 @@ rodem o mesmo código, e que atualizar a base seja uma decisão consciente:
 make check-updates              # o que mudou nos branches desde os pins
 ./scripts/fetch-oca.sh --update l10n-brazil
 make fetch && make test         # valide ANTES de commitar o pin novo
+make upgrade                    # migra cada banco que já existe (faça backup antes)
 ```
+
+Mover o pin troca o código, não o banco. Sem `make upgrade`, o Odoo roda o
+Python novo sobre o banco antigo e telas quebram com `field is undefined`. O
+roteiro completo, com as armadilhas, está em `docs/deploy-local.md` §9.
 
 Só `l10n-brazil` é a localização em si. `product-attribute`,
 `account-invoicing`, `stock-logistics-workflow` e `server-tools` entram porque
@@ -243,9 +248,13 @@ O acesso pelo navegador comum continua funcionando normalmente.
 `make test-status` mostra o andamento. Vale rodar depois de mover qualquer pin
 em `oca-repos.conf` — é a forma mais barata de pegar regressão na base.
 
-Referência deste template: **332 testes, 0 falhas** contra `l10n-brazil`
-`ce9b416` (10/09/2026), incluindo serialização de NF-e, validação de XML
-contra schema, DANFE e os campos de IBS/CBS da Reforma Tributária.
+Referência deste template: **389 testes, 1 falha** contra `l10n-brazil`
+`6bddf53` (11/10/2026), incluindo serialização de NF-e, validação de XML
+contra schema, DANFE e os campos de IBS/CBS da Reforma Tributária. A falha,
+`TestImportFiscalDocument.test_import_without_sudo`, é defeito do próprio
+teste: lê `l10n_latam_use_documents` sem conferir se o módulo
+`l10n_latam_invoice_document` está instalado, como o teste vizinho confere. Ele
+não faz parte desta stack. No `ce9b416` eram 332 testes, 0 falhas.
 
 ## Licenciamento
 

@@ -18,13 +18,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         typing_extensions cryptography pyOpenSSL \
     && pip3 install --no-cache-dir --break-system-packages \
         brazilcep \
-        brazilfiscalreport \
+        'brazilfiscalreport>=1.1.0' \
         email-validator \
         erpbrasil.assinatura \
-        erpbrasil.base \
+        'erpbrasil.base>=2.4.2' \
         erpbrasil.edoc \
         erpbrasil.transmissao \
-        nfelib \
+    `# minimos exigidos pelos manifests desde o l10n-brazil 6bddf53; o teto do` \
+    `# nfelib e porque a 3.0 e versao maior, ainda nao validada pela OCA 18.0` \
+        'nfelib>=2.6.0,<3' \
+    `# usado pelos scripts de migracao da OCA (pasta migrations/): sem ele, mover` \
+    `# um pin morre no -u com ModuleNotFoundError, mesmo a instalacao do zero indo bem` \
+        openupgradelib \
         nfselib.paulistana \
         transitions \
         workalendar \
