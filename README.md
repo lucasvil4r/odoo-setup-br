@@ -168,7 +168,8 @@ porque é justamente a parte que não varia por cliente.
 │   ├── check-deps.py        # fecho de dependências antes de instalar
 │   ├── new-module.sh        # esqueleto de módulo de customização
 │   ├── demo-oficina.py      # dados fictícios de oficina (make demo-oficina)
-│   └── atalhos-windows.bat  # atalhos ERP/PDV em janela de app no Windows
+│   ├── atalhos-windows.bat  # atalhos ERP/PDV em janela de app no Windows
+│   └── icones/              # erp.ico e pdv.ico usados pelos atalhos
 └── docs/deploy-local.md     # guia detalhado e armadilhas conhecidas
 ```
 
@@ -226,7 +227,8 @@ scripts\atalhos-windows.bat localhost 8069 acme_oficina 1
 Argumentos: servidor, porta, banco e id do PDV (o `make demo-oficina` imprime
 o comando exato no final). Para outra máquina da rede,
 troque `localhost` pelo IP do servidor. São criados dois atalhos que abrem o
-Edge em modo app:
+Edge em modo app, com os ícones de `scripts/icones/` (copie a pasta junto com o
+`.bat` ao levá-lo para outra máquina):
 
 - **ERP**: o Odoo completo, para todos os usuários.
 - **PDV**: vai direto ao caixa e imprime na impressora padrão sem a janela de

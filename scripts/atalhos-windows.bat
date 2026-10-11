@@ -45,7 +45,20 @@ if not exist "%EDGE%" (
 
 set "PASTA=%LOCALAPPDATA%\OdooApp"
 if not exist "%PASTA%" mkdir "%PASTA%"
-set "ICONE=%PASTA%\odoo.ico"
+
+rem Os icones sao copiados para a maquina: o atalho nao pode depender de onde
+rem o repositorio (ou o pendrive com ele) estava quando o .bat rodou. Sem a
+rem pasta icones ao lado do .bat, ficam com o icone do Edge.
+set "ICONE_ERP=%EDGE%,0"
+set "ICONE_PDV=%EDGE%,0"
+if exist "%~dp0icones\erp.ico" (
+  copy /y "%~dp0icones\erp.ico" "%PASTA%\erp.ico" >nul
+  set "ICONE_ERP=%PASTA%\erp.ico"
+)
+if exist "%~dp0icones\pdv.ico" (
+  copy /y "%~dp0icones\pdv.ico" "%PASTA%\pdv.ico" >nul
+  set "ICONE_PDV=%PASTA%\pdv.ico"
+)
 
 rem O PDV roda num perfil proprio do Edge: --kiosk-printing (imprime direto na
 rem impressora padrao, sem a janela de impressao) so vale quando o processo do
@@ -56,18 +69,15 @@ rem As URLs vao para o PowerShell por variavel de ambiente, nao por argumento:
 rem o "&" da query string quebraria a linha de comando do cmd.
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$ErrorActionPreference = 'Stop';" ^
-  "$ico = $env:ICONE;" ^
-  "try { Invoke-WebRequest -UseBasicParsing -Uri ($env:BASE + '/web/static/img/favicon.ico') -OutFile $ico }" ^
-  "catch { Write-Host 'Aviso: servidor fora do ar, atalhos ficam com o icone do Edge.'; $ico = $env:EDGE + ',0' };" ^
   "$q = [char]34;" ^
   "$desk = [Environment]::GetFolderPath('Desktop');" ^
   "$sh = New-Object -ComObject WScript.Shell;" ^
-  "function Atalho($nome, $args_) {" ^
+  "function Atalho($nome, $args_, $ico) {" ^
   "  $lnk = $sh.CreateShortcut((Join-Path $desk ($nome + '.lnk')));" ^
   "  $lnk.TargetPath = $env:EDGE; $lnk.Arguments = $args_;" ^
   "  $lnk.IconLocation = $ico; $lnk.Description = 'Odoo - ' + $nome; $lnk.Save() };" ^
-  "Atalho 'ERP' ('--app=' + $q + $env:URL_ERP + $q);" ^
-  "Atalho 'PDV' ('--app=' + $q + $env:URL_PDV + $q + ' --kiosk-printing --no-first-run --user-data-dir=' + $q + $env:PERFIL_PDV + $q)"
+  "Atalho 'ERP' ('--app=' + $q + $env:URL_ERP + $q) $env:ICONE_ERP;" ^
+  "Atalho 'PDV' ('--app=' + $q + $env:URL_PDV + $q + ' --kiosk-printing --no-first-run --user-data-dir=' + $q + $env:PERFIL_PDV + $q) $env:ICONE_PDV"
 if errorlevel 1 (
   echo Falha ao criar os atalhos.
   exit /b 1
@@ -79,4 +89,8 @@ echo   ERP  !URL_ERP!
 echo   PDV  !URL_PDV!
 echo.
 echo O PDV imprime direto na impressora PADRAO do Windows.
+
+rem Sem isso o Explorer pode seguir mostrando o icone antigo, do cache, quando
+rem o .bat roda de novo numa maquina que ja tinha os atalhos.
+ie4uinit.exe -show >nul 2>&1
 endlocal
