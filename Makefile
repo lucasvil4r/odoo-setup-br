@@ -31,7 +31,7 @@ DEMO_MODULES := $(BR_MODULES),$(UI_MODULES),point_of_sale,contacts
 
 .PHONY: help init fetch check-updates config build up down restart logs ps \
         install install-br install-ui update shell psql deps test new-module reset \
-        demo-oficina demo-oficina-reset
+        demo-oficina demo-oficina-reset upgrade
 
 help:
 	@echo "Setup de um projeto novo:"
@@ -54,6 +54,7 @@ help:
 	@echo "  make install-ui       menu de apps com ícones e campos visíveis (OCA/web)"
 	@echo "  make install m=a,b    instala módulos"
 	@echo "  make update m=a,b     atualiza módulos (use após mexer no seu código)"
+	@echo "  make upgrade [db=x]   migra TODOS os módulos (use após mover pin ou make build)"
 	@echo "  make new-module name=x  cria o esqueleto de um módulo em addons/local/"
 	@echo
 	@echo "Demonstração:"
@@ -125,6 +126,20 @@ update:
 	@test -n "$(m)" || (echo "uso: make update m=modulo1,modulo2" >&2; exit 1)
 	$(ODOO) -d $(PROJECT) -u $(m) --stop-after-init
 	@$(DC) restart odoo
+
+# Depois de mover um pin em oca-repos.conf: roda os scripts de migração da OCA
+# e regrava views e dados de todos os módulos. Sem isso, o Python novo roda
+# sobre um banco da versão anterior e a tela quebra com '"x"."y" field is
+# undefined'. O -u já instala dependência nova; dependência que não existe no
+# addons_path aborta tudo (veja docs/deploy-local.md §9). Faça backup antes.
+# Servidor parado: o cron dele varre todo banco aceito pelo db_filter e, com o
+# banco no meio da migração, os dois morrem em deadlock no ir_module_module.
+upgrade:
+	@echo "Odoo fora do ar enquanto $(or $(db),$(PROJECT)) é migrado..."
+	@$(DC) stop odoo
+	$(DC) run --rm -T odoo odoo -c /etc/odoo/odoo.conf -d $(or $(db),$(PROJECT)) -u all --stop-after-init \
+	  || { $(DC) start odoo; exit 1; }
+	@$(DC) start odoo
 
 shell:
 	@$(DC) exec odoo odoo shell -c /etc/odoo/odoo.conf -d $(PROJECT) --no-http
