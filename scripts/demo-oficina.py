@@ -63,6 +63,10 @@ def configura_empresa(env):
             "tax_icms_id": env.ref("l10n_br_fiscal.tax_icms_sn_com_credito").id,
             "sale_fiscal_operation_id": env.ref("l10n_br_fiscal.fo_venda").id,
             "purchase_fiscal_operation_id": env.ref("l10n_br_fiscal.fo_compras").id,
+            # Sem documento padrão, faturar a OS falha com "You need to set a
+            # default fiscal document". Peças saem em NF-e (55); os serviços, a
+            # operação fiscal já manda para NFS-e, em fatura separada.
+            "document_type_id": env.ref("l10n_br_fiscal.document_55").id,
             # Senão a primeira entrega validada abre um assistente de SMS ao
             # cliente — inclusive no meio da apresentação.
             "stock_move_sms_validation": False,
