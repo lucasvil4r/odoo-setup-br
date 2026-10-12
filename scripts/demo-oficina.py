@@ -84,8 +84,17 @@ def configura_empresa(env):
 def configura_usuarios(env, empresa):
     pt_br = env["res.lang"]._activate_lang("pt_BR")
     admin = env.ref("base.user_admin")
+    # Todo usuário precisa de e-mail: abrir o caixa do PDV registra a nota de
+    # abertura no histórico da sessão, e o Odoo recusa mensagem de autor sem
+    # e-mail ("Configure o endereço de e-mail do remetente"). Nada é enviado
+    # de fato; não há servidor de e-mail configurado.
     admin.write(
-        {"name": "Administrador", "lang": pt_br.code, "tz": "America/Sao_Paulo"}
+        {
+            "name": "Administrador",
+            "email": "admin@autocenterexemplo.com.br",
+            "lang": pt_br.code,
+            "tz": "America/Sao_Paulo",
+        }
     )
     empresa.partner_id.lang = pt_br.code
 
@@ -121,6 +130,7 @@ def configura_usuarios(env, empresa):
                 "name": nome,
                 "login": login,
                 "password": login,
+                "email": f"{login}@autocenterexemplo.com.br",
                 "lang": pt_br.code,
                 "tz": "America/Sao_Paulo",
                 "company_id": empresa.id,
