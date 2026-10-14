@@ -1,0 +1,13 @@
+ref;tipo;nome;razao_social;cpf_cnpj;ie;telefone;email;rua;numero;bairro;cep;cidade_ibge;observacao
+C001;cliente;Marcos Antônio Pereira;;809.570.154-88;;(11) 98123-4567;marcos.pereira@email.com.br;Rua das Acácias;45;Mooca;03104-020;3550308;Veículos: VW Gol 1.6 2018 — placa FHT2A31
+C002;cliente;Juliana Ferreira Costa;;303.911.718-10;;(11) 99234-5678;juliana.costa@email.com.br;Rua Coronel Rodovalho;312;Penha;03632-000;3550308;Veículos: Chevrolet Onix 1.0 Turbo 2021 — placa GKD7B12
+C003;cliente;Roberto Almeida Santos;;227.824.896-07;;(11) 97345-6789;roberto.santos@email.com.br;Rua Tuiuti;980;Tatuapé;03081-000;3550308;"Veículos:
+Fiat Strada 1.3 2022 — placa EQP4C56
+Honda Civic 2.0 2017 — placa FJR8E19"
+C004;cliente;Patrícia Gomes Oliveira;;383.465.787-50;;(11) 96456-7890;patricia.oliveira@email.com.br;Avenida Celso Garcia;2200;Belenzinho;03015-000;3550308;Veículos: Hyundai HB20 1.0 2020 — placa DZE3F45
+C005;cliente;Fernando Ribeiro Lopes;;133.150.983-10;;(11) 95567-8901;fernando.lopes@email.com.br;Rua Siqueira Bueno;1500;Belenzinho;03173-010;3550308;Veículos: Toyota Corolla 2.0 2019 — placa FRL1G23
+C101;cliente;Transportadora Rota Leste;Transportadora Rota Leste Ltda;83.863.794/0001-44;830.166.136.186;(11) 3211-4400;frota@rotaleste.com.br;Rua Guaianases;700;Vila Matilde;03510-000;3550308;Cliente frotista: 12 veículos leves. Faturamento mensal, 28 dias.
+C102;cliente;Locadora Bom Caminho;Bom Caminho Locação de Veículos Ltda;15.594.078/0001-59;609.139.099.965;(11) 3322-5500;manutencao@bomcaminho.com.br;Avenida Aricanduva;5555;Aricanduva;03527-000;3550308;Cliente frotista: revisões preventivas a cada 10.000 km.
+F001;fornecedor;Distribuidora AutoPeças Paulista;AutoPeças Paulista Distribuidora Ltda;34.131.647/0001-74;030.824.623.818;(11) 2233-1100;vendas@autopecaspaulista.com.br;Rua do Gasômetro;410;Brás;03004-000;3550308;
+F002;fornecedor;LubriMax Lubrificantes;LubriMax Comércio de Lubrificantes Ltda;27.648.350/0001-15;948.219.933.515;(11) 2344-2200;pedidos@lubrimax.com.br;Avenida Presidente Wilson;3100;Ipiranga;04220-000;3550308;
+F003;fornecedor;Pneus & Cia Atacado;Pneus e Cia Atacadista Ltda;67.242.388/0001-08;819.093.785.659;(11) 2455-3300;comercial@pneusecia.com.br;Rodovia Presidente Dutra;1800;Vila Maria;02151-000;3550308;

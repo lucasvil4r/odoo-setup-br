@@ -182,6 +182,8 @@ porque é justamente a parte que não varia por cliente.
 ├── config/
 │   ├── odoo.conf.template   # modelo versionado
 │   └── odoo.conf            # GERADO por make config (não versionado)
+├── demo/
+│   └── oficina/             # dados da demo de exemplo (make demo)
 ├── addons/
 │   ├── oca/                 # clones da OCA (não versionados, veja make fetch)
 │   └── local/               # customização do cliente (versionada)
@@ -190,7 +192,7 @@ porque é justamente a parte que não varia por cliente.
 │   ├── render-config.sh     # gera odoo.conf do .env + oca-repos.conf
 │   ├── check-deps.py        # fecho de dependências antes de instalar
 │   ├── new-module.sh        # esqueleto de módulo de customização
-│   ├── demo-oficina.py      # dados fictícios de oficina (make demo-oficina)
+│   ├── demo.py              # monta a base de demonstração (make demo)
 │   ├── atalhos-windows.bat  # atalhos ERP/PDV em janela de app no Windows
 │   └── icones/              # erp.ico e pdv.ico usados pelos atalhos
 └── docs/deploy-local.md     # guia detalhado e armadilhas conhecidas
@@ -216,16 +218,17 @@ banco, não são lidas do disco a cada request.
 ## Demonstração para o cliente
 
 ```bash
-make demo-oficina
+make demo
 ```
 
-Cria um banco separado, `$PROJECT_oficina`, com a localização, a interface, o
-PDV e dados fictícios de uma oficina mecânica: empresa no Simples Nacional,
-peças com NCM, serviços com código da LC 116 (14.01), clientes pessoa física e
-frotistas, fornecedores, estoque com regras de reposição, ordens de serviço em
-várias etapas (placa e veículo no campo "Referência do cliente"), compras e um
-PDV de balcão com Dinheiro, PIX, cartões e faturamento para o cliente. As
-peças têm código de barras EAN-13, então um leitor USB funciona no PDV.
+Cria um banco separado, `$PROJECT_demo`, com a localização, a interface, o
+PDV e os dados da pasta `demo/$DEMO_DADOS/`. O template traz `demo/oficina`,
+uma oficina mecânica fictícia: empresa no Simples Nacional, peças com NCM,
+serviços com código da LC 116 (14.01), clientes pessoa física e frotistas,
+fornecedores, estoque com regras de reposição, ordens de serviço em várias
+etapas (placa e veículo no campo "Referência do cliente"), compras e um PDV de
+balcão com Dinheiro, PIX, cartões e faturamento para o cliente. Os produtos
+ganham código de barras EAN-13, então um leitor USB funciona no PDV.
 
 | Usuário | Senha | Papel |
 |---|---|---|
@@ -233,9 +236,33 @@ peças têm código de barras EAN-13, então um leitor USB funciona no PDV.
 | `balcao` | `balcao` | caixa do PDV |
 | `consultor` | `consultor` | ordens de serviço e compras |
 
-O comando é idempotente. Para recriar do zero: `make demo-oficina-reset`.
+O comando é idempotente. Para recriar do zero: `make demo-reset`.
 Os CNPJ/CPF/IE são inventados (só o dígito verificador é válido) e nenhuma
 nota fiscal é emitida.
+
+### Montando a demo de um cliente
+
+Os dados ficam fora do código, então a demo de um cliente não precisa de
+Python — só de uma pasta nova no repositório **dele** (nunca no template, que é
+público):
+
+```bash
+cp -r demo/oficina demo/acme
+#   demo.toml       empresa, logo, usuários, PDV, vendas e compras
+#   produtos.csv    catálogo: abre no Excel, ';' ou ',' e decimal com vírgula
+#   parceiros.csv   clientes e fornecedores
+#   fotos/          imagens citadas na coluna foto de produtos.csv
+#   modulos         opcional: módulos a mais, um por linha (ex.: o tema do cliente)
+# acerte DEMO_DADOS=acme no .env
+make demo-reset demo
+```
+
+Antes de gravar qualquer coisa, o script confere as referências cruzadas (um
+código de produto numa venda que não está na planilha, uma foto que não
+existe) e lista todos os problemas de uma vez. NCM, CNAE, LC 116 e NBS
+precisam existir na tabela da `l10n_br_fiscal`; confira em
+`addons/oca/l10n-brazil/l10n_br_fiscal/data/`. A demo só conhece o Simples
+Nacional.
 
 ### Como app de desktop no Windows
 
@@ -244,11 +271,11 @@ própria, sem barra de endereço. No Windows, no `cmd`, dentro da pasta do
 repositório:
 
 ```bat
-scripts\atalhos-windows.bat localhost 8069 acme_oficina 1
+scripts\atalhos-windows.bat localhost 8069 acme_demo 1
 ```
 
-Argumentos: servidor, porta, banco e id do PDV (o `make demo-oficina` imprime
-o comando exato no final). Para outra máquina da rede,
+Argumentos: servidor, porta, banco e id do PDV (o `make demo` imprime o
+comando exato no final). Para outra máquina da rede,
 troque `localhost` pelo IP do servidor. São criados dois atalhos que abrem o
 Edge em modo app, com os ícones de `scripts/icones/` (copie a pasta junto com o
 `.bat` ao levá-lo para outra máquina):

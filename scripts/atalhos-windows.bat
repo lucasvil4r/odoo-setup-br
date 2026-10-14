@@ -5,7 +5,7 @@ rem de endereco. Continua sendo o Odoo do servidor; o navegador comum segue
 rem funcionando normalmente para quem preferir.
 rem
 rem Uso:  atalhos-windows.bat [servidor] [porta] [banco] [id_do_pdv]
-rem   ex: atalhos-windows.bat 192.168.0.10 8069 odoo-br_oficina 1
+rem   ex: atalhos-windows.bat 192.168.0.10 8069 acme_demo 1
 rem
 rem Sem argumentos aponta para localhost:8069. O banco so e necessario quando o
 rem servidor tem mais de um (o db_filter aceita o banco do projeto e derivados).

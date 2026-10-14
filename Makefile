@@ -24,14 +24,20 @@ BR_MODULES := l10n_br_base,l10n_br_zip,l10n_br_coa_generic,l10n_br_account,l10n_
 # Enterprise e, desde a v17, esconde a borda dos campos até o mouse passar.
 UI_MODULES := web_responsive,web_theme_classic
 
-# Base de demonstração (oficina mecânica) para apresentação comercial. Banco
-# separado: o script reescreve a empresa principal, então nunca no do projeto.
-DEMO_DB      := $(PROJECT)_oficina
-DEMO_MODULES := $(BR_MODULES),$(UI_MODULES),point_of_sale,contacts
+# Base de demonstração para apresentação comercial, montada a partir de
+# demo/$(DEMO_DADOS)/ (veja demo/oficina/demo.toml). Banco separado: o script
+# reescreve a empresa principal, então nunca no do projeto.
+DEMO_DADOS   ?= oficina
+DEMO_DB      := $(PROJECT)_demo
+# demo/<nome>/modulos (opcional, um por linha): módulos a mais na demo, como o
+# tema com as cores do cliente que vive em addons/local/.
+DEMO_EXTRA   := $(shell grep -hvE '^\s*(\#|$$)' demo/$(DEMO_DADOS)/modulos 2>/dev/null | paste -sd, -)
+comma        := ,
+DEMO_MODULES := $(BR_MODULES),$(UI_MODULES),point_of_sale,contacts$(if $(DEMO_EXTRA),$(comma)$(DEMO_EXTRA))
 
 .PHONY: help init fetch check-updates config build up down restart logs ps \
         install install-br install-ui update shell psql deps test new-module reset \
-        demo-oficina demo-oficina-reset upgrade
+        demo demo-reset upgrade
 
 help:
 	@echo "Setup de um projeto novo:"
@@ -58,8 +64,8 @@ help:
 	@echo "  make new-module name=x  cria o esqueleto de um módulo em addons/local/"
 	@echo
 	@echo "Demonstração:"
-	@echo "  make demo-oficina     cria o banco $(DEMO_DB) com dados fictícios de oficina"
-	@echo "  make demo-oficina-reset  apaga esse banco (para recriar do zero)"
+	@echo "  make demo             cria o banco $(DEMO_DB) com os dados de demo/$(DEMO_DADOS)/"
+	@echo "  make demo-reset       apaga esse banco (para recriar do zero)"
 	@echo
 	@echo "Diagnóstico:"
 	@echo "  make shell / psql     shell do ORM / psql no banco"
@@ -185,28 +191,27 @@ new-module:
 # db_filter aceita, tenta carregar o banco ainda pela metade e a instalação
 # morre em deadlock no ir_module_module. Por isso 'run' num container avulso,
 # e não 'exec' no servidor como o 'make install'.
-demo-oficina:
+#
+# demo/ é montada em /mnt/demo (docker-compose.yml): o script chega pelo stdin,
+# mas fotos e planilhas precisam estar visíveis dentro do container.
+demo:
+	@test -f demo/$(DEMO_DADOS)/demo.toml || { echo "demo/$(DEMO_DADOS)/demo.toml não existe (DEMO_DADOS no .env)" >&2; exit 1; }
 	@echo "Odoo fora do ar enquanto $(DEMO_DB) é montado (na primeira vez, uns 5 minutos)..."
 	@$(DC) stop odoo
 	$(DC) run --rm -T odoo odoo -c /etc/odoo/odoo.conf -d $(DEMO_DB) -i $(DEMO_MODULES) \
 	  --without-demo=all --load-language=pt_BR --stop-after-init \
 	  || { $(DC) start odoo; exit 1; }
-	$(DC) run --rm -T odoo odoo shell -c /etc/odoo/odoo.conf -d $(DEMO_DB) --no-http --log-level=warn \
-	  < scripts/demo-oficina.py || { $(DC) start odoo; exit 1; }
+	$(DC) run --rm -T -e DEMO_DIR=/mnt/demo/$(DEMO_DADOS) -e ODOO_PORT=$(ODOO_PORT) odoo \
+	  odoo shell -c /etc/odoo/odoo.conf -d $(DEMO_DB) --no-http --log-level=warn \
+	  < scripts/demo.py || { $(DC) start odoo; exit 1; }
 	@$(DC) start odoo
 	@echo
 	@echo "Pronto: http://localhost:$(ODOO_PORT)/web/login?db=$(DEMO_DB)"
-	@echo "  admin / admin          administrador"
-	@echo "  balcao / balcao        caixa do PDV (Balcão de Peças)"
-	@echo "  consultor / consultor  consultor técnico (ordens de serviço, compras)"
-	@echo
-	@echo "Atalhos de app no Windows (rode no cmd, na pasta do repositório):"
-	@echo "  scripts\\atalhos-windows.bat localhost $(ODOO_PORT) $(DEMO_DB) 1"
 
-demo-oficina-reset:
+demo-reset:
 	@read -p "Apagar o banco $(DEMO_DB)? [s/N] " c; [ "$$c" = "s" ] || { echo "cancelado"; exit 1; }
 	@$(DC) exec -T db dropdb -U $(DB_USER) --if-exists --force $(DEMO_DB)
-	@echo "Banco $(DEMO_DB) apagado. Recrie com: make demo-oficina"
+	@echo "Banco $(DEMO_DB) apagado. Recrie com: make demo"
 
 reset:
 	@echo "Isso APAGA o banco e os arquivos do Odoo do projeto $(PROJECT)."
