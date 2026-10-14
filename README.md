@@ -12,7 +12,15 @@ fora daqui, por ser específica de cada negócio.
 ## Começando um projeto novo
 
 ```bash
+# Repositório do cliente: vazio e PRIVADO (sem README, .gitignore nem licença).
+gh repo create <org>/cliente-acme --private
+
+# Clone do template; ele vira o remoto "template" e o do cliente vira "origin".
 git clone https://github.com/lucasvil4r/odoo-setup-br.git cliente-acme && cd cliente-acme
+git remote rename origin template
+git remote add origin https://github.com/<org>/cliente-acme.git
+git push -u origin master
+
 cp .env.example .env          # ajuste PROJECT e ADMIN_PASSWD
 make init                     # baixa OCA, gera config, builda, sobe
 make install-br               # instala a localização fiscal
@@ -21,19 +29,28 @@ make install-ui               # menu de apps com ícones e campos visíveis
 
 Odoo em `http://localhost:8069`. `make` sozinho lista todos os alvos.
 
+Nem o botão **Fork** nem o **Use this template** do GitHub servem aqui. Este
+repositório é público, e fork de repositório público também é público: o
+código do cliente ficaria exposto. O *Use this template* cria um histórico
+novo, sem ancestral comum com este, e aí o `git merge template/master` de
+[Trazendo melhorias](#trazendo-melhorias-do-template-para-um-projeto-já-forkado)
+deixa de funcionar. Renomear o `origin` é o que impede que um `git push`
+distraído mande branch de cliente para o template.
+
 ### O que ajustar ao forkar
 
 | Onde | O quê |
 |---|---|
-| `.env` | `PROJECT` (vira nome do banco e dos containers), `ADMIN_PASSWD`, `ODOO_PORT`, `DB_PORT` |
+| `.env` | `PROJECT` (vira nome do banco, dos containers e da imagem), `ADMIN_PASSWD`, `ODOO_PORT`, `DB_PORT` |
 | `oca-repos.conf` | repositórios OCA extras, se o cliente precisar (NFS-e, RH, etc.) |
 | `addons/local/` | os módulos de customização do cliente (`make new-module`) |
 | `README.md` | este arquivo, descrevendo o projeto do cliente |
 | `.github/CODEOWNERS` | o responsável pelo projeto do cliente, no lugar do mantenedor do template |
 | `CONTRIBUTING.md`, `SECURITY.md` | adapte ao projeto do cliente ou remova |
 
-Trocar `PROJECT` isola containers, volumes e banco: dois clientes rodam lado a
-lado na mesma máquina, bastando `ODOO_PORT` e `DB_PORT` diferentes.
+Trocar `PROJECT` isola containers, volumes, banco e imagem: dois clientes
+rodam lado a lado na mesma máquina, bastando `ODOO_PORT` e `DB_PORT`
+diferentes.
 
 ## Arquitetura em camadas
 
@@ -128,10 +145,11 @@ assim que os quatro repositórios de apoio acima apareceram, um a um.
 
 Correções feitas no template (um alvo novo no Makefile, uma armadilha
 documentada, um ajuste no Dockerfile) não chegam sozinhas nos projetos já
-iniciados. Configure o template como um segundo remoto e traga o que interessa:
+iniciados. Traga o que interessa pelo remoto `template` — quem começou pelo
+roteiro acima já o tem; num projeto mais antigo, sem ele, rode antes
+`git remote add template https://github.com/lucasvil4r/odoo-setup-br.git`:
 
 ```bash
-git remote add template https://github.com/lucasvil4r/odoo-setup-br.git
 git fetch template
 git log --oneline HEAD..template/master     # o que existe lá e não aqui
 git merge template/master                   # ou cherry-pick de commits soltos
