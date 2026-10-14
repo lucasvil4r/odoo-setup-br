@@ -81,6 +81,12 @@ jobs:
       - name: Instala a localização e a interface
         run: make install-br install-ui
 
+      # A demo é o que vai para a frente do cliente: vendas, compras, entregas
+      # e PDV passam pelos onchanges da OCA, e é aí que um pin novo costuma
+      # quebrar sem que a instalação reclame.
+      - name: Demonstração de exemplo (demo/oficina)
+        run: make demo
+
       - name: Logs do ambiente
         if: failure()
         run: docker compose logs --tail=300

@@ -45,6 +45,8 @@ services:
       - odoo_data:/var/lib/odoo
       - ./addons:/mnt/extra-addons
       - ./config:/etc/odoo
+      # Dados do make demo (planilhas e fotos), só leitura.
+      - ./demo:/mnt/demo:ro
     command: ["odoo", "-c", "/etc/odoo/odoo.conf"]
 
 volumes:
