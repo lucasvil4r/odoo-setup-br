@@ -252,6 +252,7 @@ cp -r demo/oficina demo/acme
 #   produtos.csv    catálogo: abre no Excel, ';' ou ',' e decimal com vírgula
 #   parceiros.csv   clientes e fornecedores
 #   fotos/          imagens citadas na coluna foto de produtos.csv
+#   modulos         opcional: módulos a mais, um por linha (ex.: o tema do cliente)
 # acerte DEMO_DADOS=acme no .env
 make demo-reset demo
 ```

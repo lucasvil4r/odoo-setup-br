@@ -29,7 +29,11 @@ UI_MODULES := web_responsive,web_theme_classic
 # reescreve a empresa principal, então nunca no do projeto.
 DEMO_DADOS   ?= oficina
 DEMO_DB      := $(PROJECT)_demo
-DEMO_MODULES := $(BR_MODULES),$(UI_MODULES),point_of_sale,contacts
+# demo/<nome>/modulos (opcional, um por linha): módulos a mais na demo, como o
+# tema com as cores do cliente que vive em addons/local/.
+DEMO_EXTRA   := $(shell grep -hvE '^\s*(\#|$$)' demo/$(DEMO_DADOS)/modulos 2>/dev/null | paste -sd, -)
+comma        := ,
+DEMO_MODULES := $(BR_MODULES),$(UI_MODULES),point_of_sale,contacts$(if $(DEMO_EXTRA),$(comma)$(DEMO_EXTRA))
 
 .PHONY: help init fetch check-updates config build up down restart logs ps \
         install install-br install-ui update shell psql deps test new-module reset \
